@@ -1,0 +1,501 @@
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local LocalPlayer = Players.LocalPlayer
+
+print("OE Hub Scripti Başlatılıyor...")
+local g = Instance.new("ScreenGui")
+g.Parent = LocalPlayer:WaitForChild("PlayerGui")
+g.Name = "OEHUB"
+print("ScreenGui oluşturuldu, Parent: PlayerGui")
+
+local m = Instance.new("Frame", g)
+m.Name = "Main"
+m.Size = UDim2.new(0, 450, 0, 300)
+m.Position = UDim2.new(0.5, -225, 0.5, -150)
+m.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+m.BorderSizePixel = 0
+Instance.new("UICorner", m).CornerRadius = UDim.new(0, 10)
+print("Main Frame oluşturuldu")
+
+local t = Instance.new("Frame", m)
+t.Name = "Topbar"
+t.Size = UDim2.new(1, 0, 0, 25)
+t.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+t.BorderSizePixel = 0
+Instance.new("UICorner", t).CornerRadius = UDim.new(0, 5)
+print("Topbar Frame oluşturuldu")
+
+local l = Instance.new("TextLabel", t)
+l.Name = "Title"
+l.Size = UDim2.new(1, -60, 1, 0)
+l.BackgroundTransparency = 1
+l.Text = "OE HUB"
+l.TextColor3 = Color3.new(1, 1, 1)
+l.TextScaled = true
+l.Font = Enum.Font.SourceSansBold
+l.TextXAlignment = Enum.TextXAlignment.Left
+Instance.new("UIPadding", l).PaddingLeft = UDim.new(0, 8)
+print("Title TextLabel oluşturuldu")
+
+local mb = Instance.new("TextButton", t)
+mb.Name = "Minimize"
+mb.Position = UDim2.new(1, -50, 0, 2.5)
+mb.Size = UDim2.new(0, 20, 0, 20)
+mb.BackgroundColor3 = Color3.fromRGB(255, 200, 50)
+mb.Text = "-"
+mb.TextColor3 = Color3.new(0, 0, 0)
+mb.TextScaled = true
+Instance.new("UICorner", mb).CornerRadius = UDim.new(0, 5)
+print("Minimize butonu oluşturuldu")
+
+local cb = Instance.new("TextButton", t)
+cb.Name = "Close"
+cb.Position = UDim2.new(1, -25, 0, 2.5)
+cb.Size = UDim2.new(0, 20, 0, 20)
+cb.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+cb.Text = "X"
+cb.TextColor3 = Color3.new(0, 0, 0)
+cb.TextScaled = true
+Instance.new("UICorner", cb).CornerRadius = UDim.new(0, 5)
+cb.MouseButton1Click:Connect(function()
+    g:Destroy()
+    print("GUI kapatıldı")
+end)
+print("Close butonu oluşturuldu")
+
+local c = Instance.new("ScrollingFrame", m)
+c.Name = "Content"
+c.Position = UDim2.new(0, 0, 0, 25)
+c.Size = UDim2.new(1, -130, 1, -25)
+c.BackgroundTransparency = 1
+c.BorderSizePixel = 0
+c.ScrollBarThickness = 6
+c.AutomaticCanvasSize = Enum.AutomaticSize.Y
+c.ScrollingDirection = Enum.ScrollingDirection.Y
+local cl = Instance.new("UIListLayout", c)
+cl.SortOrder = Enum.SortOrder.LayoutOrder
+cl.Padding = UDim.new(0, 6)
+local cp = Instance.new("UIPadding", c)
+cp.PaddingLeft = UDim.new(0, 8)
+cp.PaddingRight = UDim.new(0, 8)
+cp.PaddingTop = UDim.new(0, 6)
+cp.PaddingBottom = UDim.new(0, 6)
+print("Content ScrollingFrame oluşturuldu")
+
+local cb = Instance.new("Frame", m)
+cb.Name = "CategoryBar"
+cb.Position = UDim2.new(1, -130, 0, 25)
+cb.Size = UDim2.new(0, 130, 1, -25)
+cb.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+cb.BorderSizePixel = 0
+cb.Visible = true
+local cbl = Instance.new("UIListLayout", cb)
+cbl.SortOrder = Enum.SortOrder.LayoutOrder
+cbl.Padding = UDim.new(0, 2)
+Instance.new("UIPadding", cb).PaddingTop = UDim.new(0, 4)
+print("CategoryBar Frame oluşturuldu")
+
+local isFlying = false
+local flyVelocity
+local tbl_upvr = { F = 0, B = 0, L = 0, R = 0, U = 0, D = 0 }
+local function getC_upvr() local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait(); return Character end
+local function hrp_upvr(arg1) return arg1:FindFirstChild("HumanoidRootPart") end
+local function startFlying() local hrp = hrp_upvr(getC_upvr()); if hrp and not flyVelocity then flyVelocity = Instance.new("BodyVelocity", hrp); flyVelocity.MaxForce = Vector3.new(100000, 100000, 100000); flyVelocity.Velocity = Vector3.new(0, 0, 0); isFlying = true; print("Uçma aktif") end end
+local function stopFlying() isFlying = false; if flyVelocity then flyVelocity:Destroy(); flyVelocity = nil end; print("Uçma devre dışı") end
+local function updateFlying() if isFlying and flyVelocity then local hrp = hrp_upvr(getC_upvr()); if hrp then local v = Vector3.new(tbl_upvr.R - tbl_upvr.L, tbl_upvr.U - tbl_upvr.D, tbl_upvr.F - tbl_upvr.B); if v.Magnitude > 0 then local cam = workspace.CurrentCamera; flyVelocity.Velocity = (cam.CFrame.LookVector * v.Z + cam.CFrame.RightVector * v.X + Vector3.new(0, v.Y, 0)).Unit * 50 else flyVelocity.Velocity = Vector3.new(0, 0, 0) end end end end
+
+UserInputService.InputBegan:Connect(function(arg1, arg2) if not arg2 then if arg1.KeyCode == Enum.KeyCode.W then tbl_upvr.F = 1 elseif arg1.KeyCode == Enum.KeyCode.S then tbl_upvr.B = 1 elseif arg1.KeyCode == Enum.KeyCode.A then tbl_upvr.L = 1 elseif arg1.KeyCode == Enum.KeyCode.D then tbl_upvr.R = 1 elseif arg1.KeyCode == Enum.KeyCode.Space then tbl_upvr.U = 1 elseif arg1.KeyCode == Enum.KeyCode.LeftControl then tbl_upvr.D = 1 end end end)
+print("InputBegan bağlantısı oluşturuldu")
+UserInputService.InputEnded:Connect(function(arg1) if arg1.KeyCode == Enum.KeyCode.W then tbl_upvr.F = 0 elseif arg1.KeyCode == Enum.KeyCode.S then tbl_upvr.B = 0 elseif arg1.KeyCode == Enum.KeyCode.A then tbl_upvr.L = 0 elseif arg1.KeyCode == Enum.KeyCode.D then tbl_upvr.R = 0 elseif arg1.KeyCode == Enum.KeyCode.Space then tbl_upvr.U = 0 elseif arg1.KeyCode == Enum.KeyCode.LeftControl then tbl_upvr.D = 0 end end)
+print("InputEnded bağlantısı oluşturuldu")
+
+local isNoClip = false
+local noclipConnection
+local function toggleNoClip() isNoClip = not isNoClip; if isNoClip then noclipConnection = RunService.Stepped:Connect(function() local char = LocalPlayer.Character; if char then for _, p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end); print("NoClip aktif") else if noclipConnection then noclipConnection:Disconnect(); noclipConnection = nil end; local char = LocalPlayer.Character; if char then for _, p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = true end end end; print("NoClip devre dışı") end end
+LocalPlayer.CharacterAdded:Connect(function(char) if isNoClip then for _, p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end)
+print("NoClip fonksiyonları tanımlandı")
+
+local speedValue = 16
+local function updateSpeed() local char = LocalPlayer.Character; if char then local hum = char:FindFirstChildOfClass("Humanoid"); if hum then hum.WalkSpeed = speedValue; print("Hız güncellendi: " .. speedValue) end end end
+print("Hız güncelleme fonksiyonu tanımlandı")
+
+local tpLocations = {Vector3.new(-170.05867, 137.291046, 93.5553589), Vector3.new(-152.610397, 137.437836, 224.884857), Vector3.new(122.002594, 137.346588, 165.845291), Vector3.new(204.798019, 137.4039, 124.258606), Vector3.new(141.827423, 137.410828, 171.572113), Vector3.new(209.541199, 137.419098, 27.894062), Vector3.new(40.7069893, 137.499207, -137.850235), Vector3.new(32.485611, 137.573639, -274.915314), Vector3.new(10.1736879, 137.573639, -274.776398), Vector3.new(199.517014, 137.487442, -131.917343), Vector3.new(202.898529, 137.464478, -63.1280212), Vector3.new(288.16571, 137.47673, 350.711243), Vector3.new(309.066345, 137.476715, 345.732758), Vector3.new(393.492676, 137.636627, 564.548767), Vector3.new(18.3336449, 137.754517, 515.005737)}
+local currentTpIndex = 0
+local function teleportTo(index) local char = LocalPlayer.Character; if char and tpLocations[index] then local hrp = char:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = CFrame.new(tpLocations[index]); print("Işınlanılan kasa: " .. index) end end end
+print("Teleport fonksiyonları tanımlandı")
+
+local gunShopCFrame = CFrame.new(113.733871, 137.530487, 195.422028, 0.9992764, 3.70870019e-08, 0.038035199, -3.75958251e-08, 1, 1.2662408e-08, 0)
+local function teleportToGunShop() local char = LocalPlayer.Character; if char then local hrp = char:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = gunShopCFrame; print("Silahçıya ışınlanıldı") end end end
+print("GunShop teleport fonksiyonu tanımlandı")
+
+local isAimbotOn = false
+local function updateAimbot() if isAimbotOn then local char = LocalPlayer.Character; if char then local hrp = char:FindFirstChild("HumanoidRootPart"); if hrp then local target, maxDist = nil, math.huge; for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and p.Character then local tr = p.Character:FindFirstChild("HumanoidRootPart"); if tr then local dist = (hrp.Position - tr.Position).Magnitude; if dist < maxDist then maxDist = dist; target = tr end end end end; if target then workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.CFrame.Position, target.Position) end end end end end
+print("Aimbot fonksiyonu tanımlandı")
+
+local espConnections = {}
+local isEspOn = false
+local function createESP(p) if p == LocalPlayer then return end; local char = p.Character or p.CharacterAdded:Wait(); local h = char:WaitForChild("Head"); local rp = char:WaitForChild("HumanoidRootPart"); local bg = Instance.new("BillboardGui"); bg.Adornee = h; bg.Size = UDim2.new(0, 100, 0, 50); bg.StudsOffset = Vector3.new(0, 2, 0); bg.AlwaysOnTop = true; local tl = Instance.new("TextLabel"); tl.Size = UDim2.new(1, 0, 1, 0); tl.BackgroundTransparency = 1; tl.Text = p.Name; tl.TextColor3 = Color3.fromRGB(255, 0, 0); tl.TextSize = 14; tl.Font = Enum.Font.SourceSansBold; tl.Parent = bg; bg.Parent = h; local hl = Instance.new("Highlight"); hl.FillColor = Color3.fromRGB(255, 0, 0); hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.Parent = char; espConnections[p] = {Billboard = bg, Highlight = hl}; print("ESP oluşturuldu: " .. p.Name) end
+local function removeESP(p) if espConnections[p] then if espConnections[p].Billboard then espConnections[p].Billboard:Destroy() end; if espConnections[p].Highlight then espConnections[p].Highlight:Destroy() end; espConnections[p] = nil; print("ESP kaldırıldı: " .. p.Name) end end
+for _, p in pairs(Players:GetPlayers()) do if p ~= LocalPlayer and isEspOn then task.spawn(function() createESP(p) end) end end
+Players.PlayerAdded:Connect(function(p) if p ~= LocalPlayer and isEspOn then p.CharacterAdded:Connect(function() createESP(p) end) end end)
+Players.PlayerRemoving:Connect(removeESP)
+print("ESP fonksiyonları tanımlandı")
+
+local categories = {
+    ["Anasayfa"] = function(cont) 
+        local w = Instance.new("TextLabel", cont)
+        w.BackgroundTransparency = 1
+        w.TextColor3 = Color3.new(1, 1, 1)
+        w.TextScaled = true
+        w.Font = Enum.Font.SourceSans
+        w.TextWrapped = true
+        w.TextXAlignment = Enum.TextXAlignment.Left
+        w.Size = UDim2.new(1, 0, 0, 50)
+        w.Text = "Bu script Enespkr44 kardeşimizin intikamı için hazırlanmıştır"
+        print("Anasayfa metni oluşturuldu")
+        local df1 = Instance.new("Frame", cont)
+        df1.Size = UDim2.new(1, 0, 0, 20)
+        df1.BackgroundTransparency = 1
+        local l1 = Instance.new("TextLabel", df1)
+        l1.Size = UDim2.new(0.75, 0, 1, 0)
+        l1.BackgroundTransparency = 1
+        l1.TextColor3 = Color3.fromRGB(88, 166, 255)
+        l1.TextScaled = true
+        l1.Text = "https://discord.gg/ZF5fTWPh5a"
+        l1.TextXAlignment = Enum.TextXAlignment.Left
+        local c1 = Instance.new("TextButton", df1)
+        c1.Position = UDim2.new(0.75, 0, 0, 0)
+        c1.Size = UDim2.new(0.25, 0, 1, 0)
+        c1.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        c1.Text = "Kopyala"
+        c1.TextColor3 = Color3.new(1, 1, 1)
+        c1.TextScaled = true
+        Instance.new("UICorner", c1).CornerRadius = UDim.new(0, 5)
+        c1.MouseButton1Click:Connect(function() 
+            setclipboard("https://discord.gg/ZF5fTWPh5a")
+            game:GetService("StarterGui"):SetCore("SendNotification", {Title = "OE HUB", Text = "Link kopyalandı!", Duration = 3})
+            print("Discord linki kopyalandı")
+        end)
+        print("Anasayfa Discord frame'i oluşturuldu")
+    end,
+    ["Main"] = function(cont) 
+        local f = Instance.new("Frame", cont)
+        f.Size = UDim2.new(1, 0, 0, 30)
+        f.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", f).CornerRadius = UDim.new(0, 5)
+        local fl = Instance.new("TextLabel", f)
+        fl.Size = UDim2.new(0.7, 0, 1, 0)
+        fl.BackgroundTransparency = 1
+        fl.TextColor3 = Color3.new(1, 1, 1)
+        fl.TextScaled = true
+        fl.TextWrapped = true
+        fl.TextXAlignment = Enum.TextXAlignment.Left
+        fl.Text = "Uçma: KAPALI"
+        Instance.new("UIPadding", fl).PaddingLeft = UDim.new(0, 8)
+        local fb = Instance.new("TextButton", f)
+        fb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        fb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        fb.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+        fb.Text = "Aç/Kapat"
+        fb.TextColor3 = Color3.new(1, 1, 1)
+        fb.TextScaled = true
+        Instance.new("UICorner", fb).CornerRadius = UDim.new(0, 5)
+        fb.MouseButton1Click:Connect(function() 
+            if not isFlying then startFlying(); fl.Text = "Uçma: AÇIK"; fb.BackgroundColor3 = Color3.fromRGB(0, 255, 0) 
+            else stopFlying(); fl.Text = "Uçma: KAPALI"; fb.BackgroundColor3 = Color3.fromRGB(0, 100, 255) end
+            TweenService:Create(fb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+        end)
+        print("Main: Fly özelliği oluşturuldu")
+        local n = Instance.new("Frame", cont)
+        n.Size = UDim2.new(1, 0, 0, 30)
+        n.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", n).CornerRadius = UDim.new(0, 5)
+        local nl = Instance.new("TextLabel", n)
+        nl.Size = UDim2.new(0.7, 0, 1, 0)
+        nl.BackgroundTransparency = 1
+        nl.TextColor3 = Color3.new(1, 1, 1)
+        nl.TextScaled = true
+        nl.TextWrapped = true
+        nl.TextXAlignment = Enum.TextXAlignment.Left
+        nl.Text = "NoClip: KAPALI"
+        Instance.new("UIPadding", nl).PaddingLeft = UDim.new(0, 8)
+        local nb = Instance.new("TextButton", n)
+        nb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        nb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        nb.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+        nb.Text = "Aç/Kapat"
+        nb.TextColor3 = Color3.new(1, 1, 1)
+        nb.TextScaled = true
+        Instance.new("UICorner", nb).CornerRadius = UDim.new(0, 5)
+        nb.MouseButton1Click:Connect(function() 
+            toggleNoClip()
+            nl.Text = "NoClip: " .. (isNoClip and "AÇIK" or "KAPALI")
+            nb.BackgroundColor3 = isNoClip and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 100, 255)
+            TweenService:Create(nb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+        end)
+        print("Main: NoClip özelliği oluşturuldu")
+        local s = Instance.new("Frame", cont)
+        s.Size = UDim2.new(1, 0, 0, 30)
+        s.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", s).CornerRadius = UDim.new(0, 5)
+        local sl = Instance.new("TextLabel", s)
+        sl.Size = UDim2.new(0.7, 0, 1, 0)
+        sl.BackgroundTransparency = 1
+        sl.TextColor3 = Color3.new(1, 1, 1)
+        sl.TextScaled = true
+        sl.TextWrapped = true
+        sl.TextXAlignment = Enum.TextXAlignment.Left
+        sl.Text = "Hız: 16"
+        Instance.new("UIPadding", sl).PaddingLeft = UDim.new(0, 8)
+        local sb = Instance.new("TextButton", s)
+        sb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        sb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        sb.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        sb.Text = "Aç/Kapat"
+        sb.TextColor3 = Color3.new(1, 1, 1)
+        sb.TextScaled = true
+        Instance.new("UICorner", sb).CornerRadius = UDim.new(0, 5)
+        sb.MouseButton1Click:Connect(function() 
+            if speedValue == 16 then speedValue = 50; sl.Text = "Hız: 50"; sb.BackgroundColor3 = Color3.fromRGB(0, 255, 0) 
+            else speedValue = 16; sl.Text = "Hız: 16"; sb.BackgroundColor3 = Color3.fromRGB(0, 255, 100) end
+            updateSpeed()
+            TweenService:Create(sb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+        end)
+        print("Main: Speed özelliği oluşturuldu")
+    end,
+    ["Farm"] = function(cont) 
+        local tf = Instance.new("Frame", cont)
+        tf.Size = UDim2.new(1, 0, 0, 30)
+        tf.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", tf).CornerRadius = UDim.new(0, 5)
+        local tl = Instance.new("TextLabel", tf)
+        tl.Size = UDim2.new(0.7, 0, 1, 0)
+        tl.BackgroundTransparency = 1
+        tl.TextColor3 = Color3.new(1, 1, 1)
+        tl.TextScaled = true
+        tl.TextWrapped = true
+        tl.TextXAlignment = Enum.TextXAlignment.Left
+        tl.Text = "Işınlan - Kasa: 1"
+        Instance.new("UIPadding", tl).PaddingLeft = UDim.new(0, 8)
+        local tb = Instance.new("TextButton", tf)
+        tb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        tb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        tb.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+        tb.Text = "Sonraki"
+        tb.TextColor3 = Color3.new(1, 1, 1)
+        tb.TextScaled = true
+        Instance.new("UICorner", tb).CornerRadius = UDim.new(0, 5)
+        tb.MouseButton1Click:Connect(function() 
+            currentTpIndex = (currentTpIndex % #tpLocations) + 1
+            teleportTo(currentTpIndex)
+            tl.Text = "Işınlan - Kasa: " .. currentTpIndex
+            TweenService:Create(tb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+        end)
+        print("Farm: Kasa ışınlanma özelliği oluşturuldu")
+        local gf = Instance.new("Frame", cont)
+        gf.Size = UDim2.new(1, 0, 0, 30)
+        gf.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", gf).CornerRadius = UDim.new(0, 5)
+        local gl = Instance.new("TextLabel", gf)
+        gl.Size = UDim2.new(0.7, 0, 1, 0)
+        gl.BackgroundTransparency = 1
+        gl.TextColor3 = Color3.new(1, 1, 1)
+        gl.TextScaled = true
+        gl.TextWrapped = true
+        gl.TextXAlignment = Enum.TextXAlignment.Left
+        gl.Text = "Silahçı Işınlan"
+        Instance.new("UIPadding", gl).PaddingLeft = UDim.new(0, 8)
+        local gb = Instance.new("TextButton", gf)
+        gb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        gb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        gb.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+        gb.Text = "Işınlan"
+        gb.TextColor3 = Color3.new(1, 1, 1)
+        gb.TextScaled = true
+        Instance.new("UICorner", gb).CornerRadius = UDim.new(0, 5)
+        gb.MouseButton1Click:Connect(function() 
+            teleportToGunShop()
+            TweenService:Create(gb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+        end)
+        print("Farm: Silahçı ışınlanma özelliği oluşturuldu")
+    end,
+    ["ESP"] = function(cont) 
+        local ef = Instance.new("Frame", cont)
+        ef.Size = UDim2.new(1, 0, 0, 30)
+        ef.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", ef).CornerRadius = UDim.new(0, 5)
+        local el = Instance.new("TextLabel", ef)
+        el.Size = UDim2.new(0.7, 0, 1, 0)
+        el.BackgroundTransparency = 1
+        el.TextColor3 = Color3.new(1, 1, 1)
+        el.TextScaled = true
+        el.TextWrapped = true
+        el.TextXAlignment = Enum.TextXAlignment.Left
+        el.Text = "ESP: KAPALI"
+        Instance.new("UIPadding", el).PaddingLeft = UDim.new(0, 8)
+        local eb = Instance.new("TextButton", ef)
+        eb.Position = UDim2.new(0.75, 0, 0.1, 0)
+        eb.Size = UDim2.new(0.2, 0, 0.8, 0)
+        eb.BackgroundColor3 = Color3.fromRGB(100, 0, 255)
+        eb.Text = "Aç/Kapat"
+        eb.TextColor3 = Color3.new(1, 1, 1)
+        eb.TextScaled = true
+        Instance.new("UICorner", eb).CornerRadius = UDim.new(0, 5)
+        eb.MouseButton1Click:Connect(function() 
+            isEspOn = not isEspOn
+            if isEspOn then 
+                for _, p in pairs(Players:GetPlayers()) do 
+                    if p ~= LocalPlayer then task.spawn(function() createESP(p) end) end 
+                end
+                el.Text = "ESP: AÇIK"
+                eb.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            else 
+                for _, p in pairs(Players:GetPlayers()) do removeESP(p) end
+                el.Text = "ESP: KAPALI"
+                eb.BackgroundColor3 = Color3.fromRGB(100, 0, 255)
+            end
+            TweenService:Create(eb, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+            print("ESP: " .. (isEspOn and "AÇIK" or "KAPALI"))
+        end)
+        print("ESP özelliği oluşturuldu")
+    end,
+    ["Aimbot"] = function(cont) 
+        local af = Instance.new("Frame", cont)
+        af.Size = UDim2.new(1, 0, 0, 30)
+        af.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Instance.new("UICorner", af).CornerRadius = UDim.new(0, 5)
+        local al = Instance.new("TextLabel", af)
+        al.Size = UDim2.new(0.7, 0, 1, 0)
+        al.BackgroundTransparency = 1
+        al.TextColor3 = Color3.new(1, 1, 1)
+        al.TextScaled = true
+        al.TextWrapped = true
+        al.TextXAlignment = Enum.TextXAlignment.Left
+        al.Text = "Aimbot: KAPALI"
+        Instance.new("UIPadding", al).PaddingLeft = UDim.new(0, 8)
+        local ab = Instance.new("TextButton", af)
+        ab.Position = UDim2.new(0.75, 0, 0.1, 0)
+        ab.Size = UDim2.new(0.2, 0, 0.8, 0)
+        ab.BackgroundColor3 = Color3.fromRGB(255, 0, 100)
+        ab.Text = "Aç/Kapat"
+        ab.TextColor3 = Color3.new(1, 1, 1)
+        ab.TextScaled = true
+        Instance.new("UICorner", ab).CornerRadius = UDim.new(0, 5)
+        ab.MouseButton1Click:Connect(function() 
+            isAimbotOn = not isAimbotOn
+            al.Text = "Aimbot: " .. (isAimbotOn and "AÇIK" or "KAPALI")
+            ab.BackgroundColor3 = isAimbotOn and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 100)
+            TweenService:Create(ab, TweenInfo.new(0.2), {BackgroundTransparency = 0}):Play()
+            print("Aimbot: " .. (isAimbotOn and "AÇIK" or "KAPALI"))
+        end)
+        print("Aimbot özelliği oluşturuldu")
+    end
+}
+
+local catNames = {"Anasayfa", "Main", "Farm", "ESP", "Aimbot"}
+local catButtons = {}
+local selected = "Anasayfa"
+
+for i, cat in ipairs(catNames) do
+    local catBtn = Instance.new("TextButton", cb)
+    catBtn.Size = UDim2.new(1, -16, 0, 40)
+    catBtn.Position = UDim2.new(0, 8, 0, (i - 1) * 44)
+    catBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    catBtn.Text = cat
+    catBtn.TextColor3 = Color3.new(1, 1, 1)
+    catBtn.TextScaled = true
+    catBtn.Font = Enum.Font.SourceSansSemibold
+    catBtn.Visible = true
+    Instance.new("UICorner", catBtn).CornerRadius = UDim.new(0, 5)
+    catButtons[cat] = catBtn
+    catBtn.MouseButton1Click:Connect(function()
+        selected = cat
+        for c, b in pairs(catButtons) do
+            b.BackgroundColor3 = c == selected and Color3.fromRGB(50, 50, 50) or Color3.fromRGB(30, 30, 30)
+        end
+        for _, child in ipairs(c:GetChildren()) do
+            if child:IsA("Frame") or child:IsA("TextLabel") then
+                child:Destroy()
+            end
+        end
+        if categories[cat] then
+            categories[cat](c)
+            print("Kategori yüklendi: " .. cat)
+        else
+            print("Hata: " .. cat .. " kategorisi bulunamadı")
+        end
+    end)
+    print("Kategori düğmesi oluşturuldu: " .. cat)
+end
+
+catButtons["Anasayfa"].BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+if categories["Anasayfa"] then
+    categories["Anasayfa"](c)
+    print("Varsayılan kategori yüklendi: Anasayfa")
+else
+    print("Hata: Anasayfa kategorisi yüklenemedi")
+end
+print("Varsayılan kategori yüklendi")
+
+local function makeDraggable(handle, frm)
+    local dragging, dragInput, dragStart, startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        frm.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+    handle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frm.Position
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    handle.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then update(input) end
+    end)
+end
+
+makeDraggable(t, m)
+print("Sürükleme fonksiyonu aktif")
+
+local mini
+mb.MouseButton1Click:Connect(function()
+    m.Visible = false
+    if not mini then
+        mini = Instance.new("TextButton", g)
+        mini.Size = UDim2.new(0, 40, 0, 40)
+        mini.Position = UDim2.new(1, -50, 0.5, -20)
+        mini.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+        mini.Text = ""
+        Instance.new("UICorner", mini).CornerRadius = UDim.new(0, 20)
+        local miniStroke = Instance.new("UIStroke", mini)
+        miniStroke.Color = Color3.fromRGB(255, 255, 255)
+        miniStroke.Transparency = 0.8
+        miniStroke.Thickness = 2
+        mini.MouseButton1Click:Connect(function()
+            m.Visible = true
+            mini.Visible = false
+            print("GUI geri yüklendi")
+        end)
+        makeDraggable(mini, mini)
+        print("Minimize düğmesi oluşturuldu")
+    end
+    mini.Visible = true
+end)
+print("Minimize fonksiyonu aktif")
+
+RunService.Heartbeat:Connect(function(dt)
+    updateFlying()
+    updateAimbot()
+    updateSpeed()
+end)
+print("Heartbeat bağlantısı oluşturuldu")
+print("OE Hub Scripti Başarıyla Yüklendi!")
